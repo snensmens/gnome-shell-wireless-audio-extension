@@ -26,11 +26,9 @@ import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/ex
 import {QuickToggle, SystemIndicator} from 'resource:///org/gnome/shell/ui/quickSettings.js';
 
 
-class AirPlay {
+class AirPlayController {
     enable() {
-        if (this.isEnabled()) {
-            console.log('"module-raop-discover" is already loaded - nothing to do')
-        } else {
+        if (!this.isEnabled()) {
             const enableAirPlayAttempt = this._executeCommand('pactl load-module module-raop-discover');
             if (!enableAirPlayAttempt.wasSuccessful) {
                 Main.notifyError('Enableing AirPlay failed !', enableAirPlayAttempt.error);
@@ -39,23 +37,22 @@ class AirPlay {
     }
     
     disable() {
-        console.log(this._executeCommand('pactl unload-module module-raop-discover'));
+        this._executeCommand('pactl unload-module module-raop-discover');
     }
     
-    /// check if "module-raop-discover" is already loaded
     isEnabled() {
         const enabledModulesQuery = this._executeCommand('pactl list modules');
         if (enabledModulesQuery.wasSuccessful) {
-            return ( enabledModulesQuery.result.search("module-raop-discover") >= 0 );
+            return (enabledModulesQuery.result.search("module-raop-discover") >= 0);
         } else {
-            
+            console.log(`failed to fetch loaded modules: ${enabledModulesQuery.error}`)   
         }
     }
     
-    checkDependencies () {
+    checkDependencies() {
         const dependencyCheck = this._executeCommand("pactl --version");
         if (!dependencyCheck.wasSuccessful) {
-            throw dependencyCheck.error;
+            console.log(`failed to check dependencies: ${dependencyCheck.error}`);
         }
     }
     
@@ -70,14 +67,13 @@ class AirPlay {
         }
     }
 }
-const airplay = new AirPlay();
 
 
 const AirPlayQuickToggle = GObject.registerClass(
 class AirPlayQuickToggle extends QuickToggle {
     constructor(path) {
         super({
-            title: _('AirPlay'),
+            title: _('AirPlay Audio'),
             toggleMode: true,
         });
 
@@ -88,7 +84,7 @@ class AirPlayQuickToggle extends QuickToggle {
 
 const AirPlayIndicator = GObject.registerClass(
 class AirPlayIndicator extends SystemIndicator {
-    constructor(path) {
+    constructor(airplay, path) {
         super();
 
         this._indicator = this._addIndicator();
@@ -98,11 +94,8 @@ class AirPlayIndicator extends SystemIndicator {
         toggle.checked = airplay.isEnabled();
         
         toggle.connect("notify::checked", () => {
-            if (toggle.checked) {
-                toggle.checked = airplay.enable().wasSuccessful;
-            } else {
-                airplay.disable();
-            }
+            toggle.checked ? airplay.enable() : airplay.disable();
+            toggle.checked = airplay.isEnabled();
         });
             
         this.quickSettingsItems.push(toggle);
@@ -112,14 +105,18 @@ class AirPlayIndicator extends SystemIndicator {
 
 export default class QuickSettingsAirPlayExtension extends Extension {
     enable() {
-        airplay.checkDependencies()
-        this._indicator = new AirPlayIndicator(this.path);
+        this.airplay = new AirPlayController();
+        this.airplay.checkDependencies();
+        
+        this._indicator = new AirPlayIndicator(this.airplay, this.path);
         Main.panel.statusArea.quickSettings.addExternalIndicator(this._indicator);
     }
 
     disable() {
-        airplay.disable();
+        this.airplay.disable();
         this._indicator.quickSettingsItems.forEach(item => item.destroy());
         this._indicator.destroy();
+        
+        this.airplay = null;
     }
 }

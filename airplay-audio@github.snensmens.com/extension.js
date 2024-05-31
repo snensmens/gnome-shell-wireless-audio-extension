@@ -31,7 +31,7 @@ class AirPlayController {
         if (!this.isEnabled()) {
             const enableAirPlayAttempt = this._executeCommand('pactl load-module module-raop-discover');
             if (!enableAirPlayAttempt.wasSuccessful) {
-                Main.notifyError('Enableing AirPlay failed !', enableAirPlayAttempt.error);
+                Main.notifyError('AirPlay Audio', `Failed to enable AirPlay discovery: ${enableAirPlayAttempt.error}`);
             }
         }
     }
@@ -45,14 +45,14 @@ class AirPlayController {
         if (enabledModulesQuery.wasSuccessful) {
             return (enabledModulesQuery.result.search("module-raop-discover") >= 0);
         } else {
-            console.log(`failed to fetch loaded modules: ${enabledModulesQuery.error}`)   
+            console.error(`failed to fetch loaded modules: ${enabledModulesQuery.error}`)
         }
     }
     
     checkDependencies() {
         const dependencyCheck = this._executeCommand("pactl --version");
         if (!dependencyCheck.wasSuccessful) {
-            console.log(`failed to check dependencies: ${dependencyCheck.error}`);
+            console.error(`failed to check dependencies: ${dependencyCheck.error}`);
         }
     }
     
@@ -93,11 +93,11 @@ class AirPlayIndicator extends SystemIndicator {
         const toggle = new AirPlayQuickToggle(path);
         toggle.checked = airplay.isEnabled();
         
-        toggle.connect("notify::checked", () => {
+        toggle.connect('notify::checked', () => {
             toggle.checked ? airplay.enable() : airplay.disable();
             toggle.checked = airplay.isEnabled();
         });
-            
+        
         this.quickSettingsItems.push(toggle);
     }
 });
@@ -105,18 +105,18 @@ class AirPlayIndicator extends SystemIndicator {
 
 export default class QuickSettingsAirPlayExtension extends Extension {
     enable() {
-        this.airplay = new AirPlayController();
-        this.airplay.checkDependencies();
+        this._airplay = new AirPlayController();
+        this._airplay.checkDependencies();
         
-        this._indicator = new AirPlayIndicator(this.airplay, this.path);
+        this._indicator = new AirPlayIndicator(this._airplay, this.path);
         Main.panel.statusArea.quickSettings.addExternalIndicator(this._indicator);
     }
 
     disable() {
-        this.airplay.disable();
+        this._airplay.disable();
         this._indicator.quickSettingsItems.forEach(item => item.destroy());
         this._indicator.destroy();
         
-        this.airplay = null;
+        this._airplay = null;
     }
 }

@@ -1,5 +1,5 @@
 # gnome-airplay-audio-extension
-Discover AirPlay Devices and make them available as audio-output sources
+Discover AirPlay Devices and make them available as audio-outputs
 
 ## Important
 This extension requires `pactl` to be installed on your system

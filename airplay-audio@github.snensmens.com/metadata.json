@@ -1,0 +1,10 @@
+{
+  "name": "AirPlay Audio",
+  "description": "Make AirPlay devices available as audio outputs",
+  "uuid": "airplay-audio@github.snensmens.com",
+  "url": "https://github.com/snensmens/gnome-airplay-extension",
+  "shell-version": [
+    "46"
+  ],
+  "version": 1
+}

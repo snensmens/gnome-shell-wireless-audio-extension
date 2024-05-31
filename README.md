@@ -1,7 +1,7 @@
 # gnome-airplay-audio-extension
-Discover AirPlay Devices and connect to them as audio-output
+Discover AirPlay Devices and make them available as audio-output sources
 
-## Dependencies
+## Important
 This extension requires `pactl` to be installed on your system
 - For Fedora Workstation install it with `dnf install pulseaudio-utils`
 - For Ubuntu use `apt install pulseaudio-utils`

@@ -73,7 +73,7 @@ const AirPlayQuickToggle = GObject.registerClass(
 class AirPlayQuickToggle extends QuickToggle {
     constructor(path) {
         super({
-            title: _('AirPlay Audio'),
+            title: _('Wireless Audio'),
             toggleMode: true,
         });
 

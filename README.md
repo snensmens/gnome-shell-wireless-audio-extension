@@ -1,4 +1,4 @@
-# gnome-shell-wireless6-audio-extension
+# gnome-shell-wireless-audio-extension
 Discover AirPlay Devices and make them available as audio-outputs
 
 ## Important

@@ -1,9 +1,9 @@
 #! /bin/bash
 
-zip -r -q airplay-audio@github.snensmens.com.zip airplay-audio@github.snensmens.com
+zip -r -q wireless-audio@github.snensmens.com.zip wireless-audio@github.snensmens.com
 
-gnome-extensions install airplay-audio@github.snensmens.com.zip --force
+gnome-extensions install wireless-audio@github.snensmens.com.zip --force
 
-rm airplay-audio@github.snensmens.com.zip
+rm wireless-audio@github.snensmens.com.zip
 
 echo "done"

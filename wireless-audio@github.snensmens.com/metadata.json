@@ -1,8 +1,8 @@
 {
-  "name": "AirPlay Audio",
+  "name": "Wireless Audio",
   "description": "Discover AirPlay Devices and make them available as audio-outputs\n\nThis extension requires 'pactl' to be installed on your system\n- For Fedora Workstation install it with 'dnf install pulseaudio-utils'\n- For Ubuntu use 'apt install pulseaudio-utils'",
-  "uuid": "airplay-audio@github.snensmens.com",
-  "url": "https://github.com/snensmens/gnome-airplay-extension",
+  "uuid": "wireless-audio@github.snensmens.com",
+  "url": "https://github.com/snensmens/gnome-shell-wireless-audio-extension",
   "shell-version": [ "46" ],
   "session-modes": [
     "unlock-dialog",

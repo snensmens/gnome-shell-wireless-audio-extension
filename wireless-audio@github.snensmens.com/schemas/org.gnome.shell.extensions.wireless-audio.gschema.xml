@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.wireless-audio" path="/org/gnome/shell/extensions/wireless-audio/">
+    <key name="activate-on-startup" type="b">
+      <default>false</default>
+    </key>
+    <key name="show-topbar-icon" type="b">
+      <default>false</default>
+    </key>
+    
+    <key name="discover-airplay" type="b">
+      <default>true</default>
+    </key>
+    <key name="discover-tcp" type="b">
+      <default>true</default>
+    </key>
+    
+    <key name="expose-tcp" type="b">
+      <default>false</default>
+    </key>
+  </schema>
+</schemalist>

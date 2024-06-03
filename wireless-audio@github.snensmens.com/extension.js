@@ -20,85 +20,53 @@ import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import * as MessageTray from 'resource:///org/gnome/shell/ui/messageTray.js';
 
 import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 import {QuickToggle, SystemIndicator} from 'resource:///org/gnome/shell/ui/quickSettings.js';
 
+import {AirPlayController} from './airplay.js';
+import {TCPDiscoverer} from './tcp.js';
 
-class AirPlayController {
-    enable() {
-        if (!this.isEnabled()) {
-            const enableAirPlayAttempt = this._executeCommand('pactl load-module module-raop-discover');
-            if (!enableAirPlayAttempt.wasSuccessful) {
-                Main.notifyError('AirPlay Audio', `Failed to enable AirPlay discovery: ${enableAirPlayAttempt.error}`);
-            }
-        }
-    }
-    
-    disable() {
-        this._executeCommand('pactl unload-module module-raop-discover');
-    }
-    
-    isEnabled() {
-        const enabledModulesQuery = this._executeCommand('pactl list modules');
-        if (enabledModulesQuery.wasSuccessful) {
-            return (enabledModulesQuery.result.search("module-raop-discover") >= 0);
-        } else {
-            console.error(`failed to fetch loaded modules: ${enabledModulesQuery.error}`)
-        }
-    }
-    
-    checkDependencies() {
-        const dependencyCheck = this._executeCommand("pactl --version");
-        if (!dependencyCheck.wasSuccessful) {
-            console.error(`failed to check dependencies: ${dependencyCheck.error}`);
-        }
-    }
-    
-    _executeCommand(command) {
-        const result = GLib.spawn_command_line_sync(command);
-        const decoder = new TextDecoder();
-        
-        return { 
-            result: decoder.decode(result[1]),
-            error: decoder.decode(result[2]),
-            wasSuccessful: Object.keys(result[2]).length === 0
-        }
-    }
-}
-
-
-const AirPlayQuickToggle = GObject.registerClass(
-class AirPlayQuickToggle extends QuickToggle {
-    constructor(path) {
+const WirelessAudioQuickToggle = GObject.registerClass(
+class WirelessAudioQuickToggle extends QuickToggle {
+    constructor(settings, path) {
         super({
             title: _('Wireless Audio'),
-            toggleMode: true,
+            toggleMode: true
         });
-
+        
         this.gicon = Gio.icon_new_for_string(`${path}/icons/hicolor/scalable/actions/speaker-wireless-symbolic.svg`);
+        this.checked = settings.get_boolean('activate-on-startup');
     }
 });
 
 
-const AirPlayIndicator = GObject.registerClass(
-class AirPlayIndicator extends SystemIndicator {
-    constructor(airplay, path) {
+const WirelessAudioIndicator = GObject.registerClass(
+class WirelessAudioIndicator extends SystemIndicator {
+    constructor(settings, path, airplay) {
         super();
 
         this._indicator = this._addIndicator();
-        this._indicator.visible = false;
-
-        const toggle = new AirPlayQuickToggle(path);
-        toggle.checked = airplay.isEnabled();
+        this._indicator.gicon = Gio.icon_new_for_string(`${path}/icons/hicolor/scalable/actions/speaker-wireless-symbolic.svg`);
         
-        toggle.connect('notify::checked', () => {
-            toggle.checked ? airplay.enable() : airplay.disable();
-            toggle.checked = airplay.isEnabled();
+        //settings.bind('show-topbar-icon', this._indicator, 'visible', Gio.SettingsBindFlags.DEFAULT);
+        
+        this.toggle = new WirelessAudioQuickToggle(settings, path);
+        this.toggle.connect('notify::checked', () => {
+            this._indicator.visible = this.toggle.checked && settings.get_boolean('show-topbar-icon');
+            
+            if (settings.get_boolean('discover-airplay')) {
+                this.toggle.checked ? airplay.enable() : airplay.disable();
+            }
         });
         
-        this.quickSettingsItems.push(toggle);
+        this._indicator.visible = this.toggle.checked && settings.get_value('show-topbar-icon');
+        
+        settings.connect('changed::show-topbar-icon', (_, key) => {
+            this._indicator.visible = this.toggle.checked && settings.get_boolean('show-topbar-icon');
+        });
+        
+        this.quickSettingsItems.push(this.toggle);
     }
 });
 
@@ -106,10 +74,20 @@ class AirPlayIndicator extends SystemIndicator {
 export default class QuickSettingsAirPlayExtension extends Extension {
     enable() {
         this._airplay = new AirPlayController();
-        this._airplay.checkDependencies();
         
-        this._indicator = new AirPlayIndicator(this._airplay, this.path);
+        this._indicator = new WirelessAudioIndicator(this.getSettings(), this.path, this._airplay);
         Main.panel.statusArea.quickSettings.addExternalIndicator(this._indicator);
+        
+        this._settings = this.getSettings();
+        this._discoverAirplayHandlerId = this._settings.connect('changed::discover-airplay', (settings, key) => {
+            console.log(`${key} = ${settings.get_value(key).print(true)}`);
+            
+            if (this._indicator.toggle.checked) {
+                settings.get_boolean(key) ? this._airplay.enable() : this._airplay.disable();
+            }
+        });
+        this._discoverTCPHandlerId = this._settings.connect('changed::discover-tcp', (settings, key) => { console.log(`${key} = ${settings.get_value(key).print(true)}`); });
+        this._exposeTCPHandlerId = this._settings.connect('changed::expose-tcp', (settings, key) => { console.log(`${key} = ${settings.get_value(key).print(true)}`); });
     }
 
     disable() {
@@ -118,5 +96,17 @@ export default class QuickSettingsAirPlayExtension extends Extension {
         this._indicator.destroy();
         
         this._airplay = null;
+        
+        if (this._discoverAirplayHandlerId) {
+            this._settings.disconnect(this._discoverAirplayHandlerId);
+        }
+        if (this._discoverTCPHandlerId) {
+            this._settings.disconnect(this._discoverTCPHandlerId);
+        }
+        if (this._exposeTCPHandlerId) {
+            this._settings.disconnect(this._exposeTCPHandlerId);
+        }
+        this._settings = null;
     }
 }
+

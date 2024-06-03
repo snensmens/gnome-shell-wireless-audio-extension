@@ -8,5 +8,6 @@
     "unlock-dialog",
     "user"
   ],
+  "settings-schema": "org.gnome.shell.extensions.wireless-audio",
   "version": 1
 }

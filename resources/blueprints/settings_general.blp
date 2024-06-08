@@ -1,0 +1,35 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $GeneralSettings : Adw.PreferencesPage {
+  title: _("Allgemein");
+  icon-name: "settings-symbolic";
+
+  Adw.PreferencesGroup {
+    Adw.SwitchRow activate_on_login {
+      title: _("Erweiterung bei Login aktivieren");
+    }
+
+    Adw.SwitchRow show_icon {
+      title: _("Icon in der Kopfleiste anzeigen");
+    }
+  }
+
+  Adw.PreferencesGroup {
+    title: _("Dienste");
+    description: _("Wähle die Dienste die du mit der Erweiterung verwenden möchtest");
+
+    Adw.SwitchRow enable_airplay {
+      title: _("Zu AirPlay-Empfängern streamen");
+    }
+
+    Adw.SwitchRow enable_rtp_streaming {
+      title: _("Zu RTP-Empfängern streamen");
+    }
+
+    Adw.SwitchRow enable_rtp_receiving {
+      title: _("Audio auf diesem Gerät empfangen");
+    }
+  }
+}
+

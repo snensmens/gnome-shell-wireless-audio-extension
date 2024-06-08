@@ -26,6 +26,8 @@ import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/ex
 import {QuickToggle, SystemIndicator} from 'resource:///org/gnome/shell/ui/quickSettings.js';
 
 import {AirPlayController} from './src/airplay.js';
+import {RtpReceiveController} from './src/rtp.js';
+
 //import {TCPDiscoverer} from './src/tcp.js';
 
 const WirelessAudioQuickToggle = GObject.registerClass(
@@ -66,6 +68,7 @@ export default class QuickSettingsAirPlayExtension extends Extension {
         this._settings = this.getSettings();
         
         this.airplay = new AirPlayController(this._settings);
+        this.rtpReveice = new RtpReceiveController(this._settings);
     }
 
     disable() {
@@ -75,6 +78,9 @@ export default class QuickSettingsAirPlayExtension extends Extension {
         this.airplay.disable();
         this.airplay = null;
         
+        this.rtpReveice.disable();
+        this.rtpReveice = null;
+
         this._settings = null;
     }
 }

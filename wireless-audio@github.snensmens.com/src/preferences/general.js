@@ -3,6 +3,7 @@ import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gio from 'gi://Gio';
 
+import {execute} from '../command.js';
 
 export const GeneralSettings = GObject.registerClass({
     GTypeName: 'GeneralSettings',
@@ -25,5 +26,16 @@ export const GeneralSettings = GObject.registerClass({
         this.settings.bind('enable-airplay', this._enable_airplay, 'active', Gio.SettingsBindFlags.DEFAULT);
         this.settings.bind('enable-rtp-streaming', this._enable_rtp_streaming, 'active', Gio.SettingsBindFlags.DEFAULT);
         this.settings.bind('enable-rtp-receiving', this._enable_rtp_receiving, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+        this.settings.connect('changed::enable-rtp-receiving', () => {
+            if (this.settings.get_boolean('enable-rtp-receiving')) {
+                const fetchIpAttempt = execute('sh -c "hostname -I | awk \'{print $1}\'"');
+                if (fetchIpAttempt.wasSuccessful) {
+                    this._enable_rtp_receiving.set_subtitle(`Verfügbar unter ${fetchIpAttempt.result.trim()}`);
+                }
+            } else {
+                this._enable_rtp_receiving.set_subtitle('');
+            }
+        });
     }
 });

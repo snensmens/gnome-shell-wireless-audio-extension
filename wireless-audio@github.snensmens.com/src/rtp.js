@@ -8,6 +8,13 @@ export class RtpSendController {
         this.moduleID = null;
         this.isEnabled = () => this.moduleID != null;
 
+        const enabledModulesQuery = execute('sh -c "pactl list modules short | grep module-rtp-recv | awk \'{print $1}\'"');
+        if (enabledModulesQuery.wasSuccessful) {
+            if (enabledModulesQuery.result !== '') {
+                this.moduleID = enabledModulesQuery.result.trim();
+            }
+        }
+
         settings.connect('changed::enable-rtp-streaming', () => {
             settings.get_boolean('enable-rtp-streaming') && settings.get_boolean('active') ? this.enable() : this.disable();
         });
@@ -56,12 +63,16 @@ export class RtpReceiveController {
             const enableRtpReceiveAttempt = execute('pactl load-module module-rtp-recv latency_msec=15 sap_address=0.0.0.0');
             if (enableRtpReceiveAttempt.wasSuccessful) {
                 this.moduleID = enableRtpReceiveAttempt.result.trim();
+
+                console.log(`loaded rtp receiver module. id is ${this.moduleID}`);
             }
         }
     }
 
     disable() {
         if (this.isEnabled()) {
+            console.log(`unloading rtp receiver module ${this.moduleID}`);
+
             execute(`pactl unload-module ${this.moduleID}`);
             this.moduleID = null;
         }

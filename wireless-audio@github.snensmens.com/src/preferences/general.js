@@ -37,5 +37,12 @@ export const GeneralSettings = GObject.registerClass({
                 this._enable_rtp_receiving.set_subtitle('');
             }
         });
+
+        if (this.settings.get_boolean('enable-rtp-receiving')) {
+            const fetchIpAttempt = execute('sh -c "hostname -I | awk \'{print $1}\'"');
+            if (fetchIpAttempt.wasSuccessful) {
+                this._enable_rtp_receiving.set_subtitle(`Verfügbar unter ${fetchIpAttempt.result.trim()}`);
+            }
+        }
     }
 });

@@ -12,7 +12,7 @@ export class AirPlayController {
         const enabledModulesQuery = execute('sh -c "pactl list modules short | grep module-raop-discover | awk \'{print $1}\'"');
         if (enabledModulesQuery.wasSuccessful) {
             if (enabledModulesQuery.result !== '') {
-                this.moduleID = enabledModulesQuery.result;
+                this.moduleID = enabledModulesQuery.result.trim();
             }
         } else {
             console.log(`failed to fetch loaded modules: ${enabledModulesQuery.error}`)

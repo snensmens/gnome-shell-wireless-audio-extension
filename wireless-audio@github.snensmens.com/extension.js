@@ -51,6 +51,14 @@ class WirelessAudioIndicator extends SystemIndicator {
         this._indicator = this._addIndicator();
         this._indicator.gicon = Gio.icon_new_for_string(`${path}/resources/icons/hicolor/scalable/actions/speaker-wireless-symbolic.svg`);
         
+        this.visible = settings.get_boolean('show-icon') && settings.get_boolean('active');
+        settings.connect('changed::show-icon', () => {
+            this.visible = settings.get_boolean('show-icon') && settings.get_boolean('active');;
+        });
+        settings.connect('changed::active', () => {
+            this.visible = settings.get_boolean('show-icon') && settings.get_boolean('active');;
+        });
+
         this.toggle = new WirelessAudioQuickToggle(settings, path);
         settings.bind('active', this.toggle, 'checked', Gio.SettingsBindFlags.DEFAULT);
         this.toggle.connect('notify::checked', () => {});
@@ -61,11 +69,12 @@ class WirelessAudioIndicator extends SystemIndicator {
 
 
 export default class QuickSettingsAirPlayExtension extends Extension {
-    enable() {    
+    enable() {
+        this._settings = this.getSettings();
+        this._settings.set_boolean('active', false);
+
         this._indicator = new WirelessAudioIndicator(this.getSettings(), this.path, this._airplay);
         Main.panel.statusArea.quickSettings.addExternalIndicator(this._indicator);
-        
-        this._settings = this.getSettings();
         
         this.airplay = new AirPlayController(this._settings);
         this.rtpReveice = new RtpReceiveController(this._settings);
@@ -73,6 +82,7 @@ export default class QuickSettingsAirPlayExtension extends Extension {
 
     disable() {
         this._indicator.toggle.active = false;
+        this._indicator.quickSettingsItems.forEach(item => item.destroy());
         this._indicator.destroy();
         
         this.airplay.disable();

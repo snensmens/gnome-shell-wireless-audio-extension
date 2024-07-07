@@ -78,3 +78,13 @@ export class RtpReceiveController {
         }
     }
 }
+
+class Group {
+    const name = "";
+    const devices = [];
+}
+
+class Device {
+    const name = "";
+    const address = "";
+}

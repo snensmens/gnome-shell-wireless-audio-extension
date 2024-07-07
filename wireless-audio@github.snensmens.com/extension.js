@@ -26,6 +26,8 @@ import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/ex
 import {QuickToggle, SystemIndicator} from 'resource:///org/gnome/shell/ui/quickSettings.js';
 
 import {AirPlayController} from './src/airplay.js';
+import {PactlController} from "./src/pactl.js";
+
 
 const WirelessAudioQuickToggle = GObject.registerClass(
 class WirelessAudioQuickToggle extends QuickToggle {
@@ -42,25 +44,35 @@ class WirelessAudioQuickToggle extends QuickToggle {
 
 const WirelessAudioIndicator = GObject.registerClass(
 class WirelessAudioIndicator extends SystemIndicator {
-    constructor(settings, path, airplay) {
+    constructor(settings, path) {
         super();
 
         this._indicator = this._addIndicator();
         this._indicator.gicon = Gio.icon_new_for_string(`${path}/resources/icons/hicolor/scalable/actions/speaker-wireless-symbolic.svg`);
         
-        this.visible = settings.get_boolean('show-icon') && settings.get_boolean('active');
-        settings.connect('changed::show-icon', () => {
-            this.visible = settings.get_boolean('show-icon') && settings.get_boolean('active');;
-        });
-        settings.connect('changed::active', () => {
-            this.visible = settings.get_boolean('show-icon') && settings.get_boolean('active');;
+        this.toggle = new WirelessAudioQuickToggle(settings, path);
+        this.toggle.connect('notify::checked', () => {
+            this.toggle.checked ? this.showIconIfEnabled() : this.hideIcon();
         });
 
-        this.toggle = new WirelessAudioQuickToggle(settings, path);
-        settings.bind('active', this.toggle, 'checked', Gio.SettingsBindFlags.DEFAULT);
-        this.toggle.connect('notify::checked', () => {});
-        
+        this.settings = settings;
+        this.settings.connect('changed::show-icon', () => {
+            this.settings.get_boolean('show-icon') ? this.showIconIfEnabled() : this.hideIcon();
+        });
+
+        this.visible = this.settings.get_boolean('show-icon') && this.toggle.checked;
+
         this.quickSettingsItems.push(this.toggle);
+    }
+
+    showIconIfEnabled() {
+        if( this.settings.get_boolean('show-icon') && this.toggle.checked ) {
+            this.visible = true;
+        }
+    }
+
+    hideIcon() {
+        this.visible = false;
     }
 });
 
@@ -70,20 +82,29 @@ export default class QuickSettingsAirPlayExtension extends Extension {
         this._settings = this.getSettings();
         this._settings.set_boolean('active', false);
 
-        this._indicator = new WirelessAudioIndicator(this.getSettings(), this.path, this._airplay);
+        this._indicator = new WirelessAudioIndicator(this.getSettings(), this.path);
         Main.panel.statusArea.quickSettings.addExternalIndicator(this._indicator);
         
-        this.airplay = new AirPlayController(this._settings);
+        this.pactl = new PactlController();
+        this.airplay = new AirPlayController();
+
+        this.toggle = this._indicator.toggle;
+
+        if( this.pactl.isInstalled() ) {
+            this.toggle.connect('notify::checked', () => {
+                this.toggle.checked ? this.airplay.enable() : this.airplay.disable();
+            });
+        }
     }
 
     disable() {
+        this.airplay.disable();
+
         this._indicator.toggle.active = false;
         this._indicator.quickSettingsItems.forEach(item => item.destroy());
         this._indicator.destroy();
         
-        this.airplay.disable();
         this.airplay = null;
-
         this._settings = null;
     }
 }

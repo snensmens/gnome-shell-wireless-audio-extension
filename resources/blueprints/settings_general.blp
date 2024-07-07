@@ -5,10 +5,24 @@ template $GeneralSettings : Adw.PreferencesPage {
   title: _("Allgemein");
   icon-name: "settings-symbolic";
 
-  Adw.PreferencesGroup {
+  Adw.PreferencesGroup general_preferences {
     Adw.SwitchRow show_icon {
       title: _("Icon in der Kopfleiste anzeigen");
     }
   }
-}
 
+  Adw.PreferencesGroup installation_hint {
+    Box {
+      orientation: vertical;
+      valign: center;
+
+      Label {
+        label: _("Diese Erweiterung erfordert die Installation von pactl");
+      }
+      LinkButton {
+        label: _("Setup-Anleitung anzeigen");
+        uri: "https://gjs.guide/guides/gio/actions-and-menus.html";
+      }
+    }
+  }
+}

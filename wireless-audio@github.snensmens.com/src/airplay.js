@@ -4,41 +4,30 @@ import {execute} from './command.js';
 
 
 export class AirPlayController {
-    constructor(settings) {
+    constructor() {
         this.moduleID = null;
         this.isEnabled = () => this.moduleID != null;
         
-        // check if airplay-discovery is already activated
+        // check if airplay-discovery-module is already loaded
         const enabledModulesQuery = execute('sh -c "pactl list modules short | grep module-raop-discover | awk \'{print $1}\'"');
+
         if (enabledModulesQuery.wasSuccessful) {
             if (enabledModulesQuery.result !== '') {
                 this.moduleID = enabledModulesQuery.result.trim();
             }
         } else {
-            console.log(`failed to fetch loaded modules: ${enabledModulesQuery.error}`)
-        }
-        
-        settings.connect('changed::enable-airplay', () => {
-            settings.get_boolean('enable-airplay') && settings.get_boolean('active') ? this.enable() : this.disable();
-        });
-        
-        settings.connect('changed::active', () => {
-            settings.get_boolean('enable-airplay') && settings.get_boolean('active') ? this.enable() : this.disable();
-        });
-        
-        if (settings.get_boolean('enable-airplay') && settings.get_boolean('active')) {
-            this.enable();
+            console.log(`[gnome-wireless-audio-extension] failed to fetch loaded modules: ${enabledModulesQuery.error}`)
         }
     }
 
     enable() {
         if (!this.isEnabled()) {
             const enableAirPlayAttempt = execute('pactl load-module module-raop-discover');
-            if (!enableAirPlayAttempt.wasSuccessful) {
-                Main.notifyError('Wireless Audio', `Failed to enable AirPlay discovery: ${enableAirPlayAttempt.error}`);
-            }
-            else {
+
+            if (enableAirPlayAttempt.wasSuccessful) {
                 this.moduleID = enableAirPlayAttempt.result;
+            } else {
+                console.error(enableAirPlayAttempt.error)
             }
         }
     }

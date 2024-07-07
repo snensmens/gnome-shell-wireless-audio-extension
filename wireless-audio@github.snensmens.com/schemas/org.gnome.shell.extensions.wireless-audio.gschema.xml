@@ -4,22 +4,12 @@
     <key name="active" type="b">
       <default>false</default>
     </key>
-    <key name="activate-on-login" type="b">
-      <default>false</default>
-    </key>
     <key name="show-icon" type="b">
       <default>false</default>
     </key>
     
     <key name="enable-airplay" type="b">
       <default>true</default>
-    </key>
-    <key name="enable-rtp-streaming" type="b">
-      <default>true</default>
-    </key>
-    
-    <key name="enable-rtp-receiving" type="b">
-      <default>false</default>
     </key>
   </schema>
 </schemalist>

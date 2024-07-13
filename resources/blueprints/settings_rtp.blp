@@ -1,0 +1,24 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $RTPSettings : Adw.PreferencesPage {
+  title: _("RTP Geräte");
+  icon-name: "speaker-symbolic";
+
+  Adw.PreferencesGroup control {
+    Adw.ActionRow add_group_button {
+      title: _("Neue Gruppe erstellen");
+      activatable-widget: add;
+
+      [suffix]
+      Button add {
+        icon-name: "list-add-symbolic";
+        valign: center;
+
+        styles [
+          "flat"
+        ]
+      }
+    }
+  }
+}

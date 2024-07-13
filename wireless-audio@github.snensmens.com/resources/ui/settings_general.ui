@@ -11,9 +11,35 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
     <property name="icon-name">settings-symbolic</property>
     <child>
       <object class="AdwPreferencesGroup" id="general_preferences">
+        <property name="title" translatable="true">Allgemein</property>
         <child>
           <object class="AdwSwitchRow" id="show_icon">
-            <property name="title" translatable="true">Icon in der Kopfleiste anzeigen</property>
+            <property name="title" translatable="true">Icon in Kopfleiste anzeigen</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesGroup" id="airplay_preferences">
+        <property name="title" translatable="true">AirPlay</property>
+        <child>
+          <object class="AdwSwitchRow" id="enable_airplay">
+            <property name="title" translatable="true">AirPlay Geräte anzeigen</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesGroup" id="rtp_preferences">
+        <property name="title" translatable="true">RTP</property>
+        <child>
+          <object class="AdwSwitchRow" id="enable_rtp_sending">
+            <property name="title" translatable="true">Audio über RTP senden</property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwSwitchRow" id="enable_rtp_receiving">
+            <property name="title" translatable="true">Audio auf diesem Gerät empfangen</property>
           </object>
         </child>
       </object>

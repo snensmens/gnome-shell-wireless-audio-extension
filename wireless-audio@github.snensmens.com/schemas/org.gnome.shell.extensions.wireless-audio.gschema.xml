@@ -1,15 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
   <schema id="org.gnome.shell.extensions.wireless-audio" path="/org/gnome/shell/extensions/wireless-audio/">
-    <key name="active" type="b">
+    <key name="extension-active" type="b">
       <default>false</default>
     </key>
+
     <key name="show-icon" type="b">
       <default>false</default>
     </key>
     
     <key name="enable-airplay" type="b">
       <default>true</default>
+    </key>
+
+    <key name="enable-rtp-sending" type="b">
+      <default>false</default>
+    </key>
+
+    <key name="enable-rtp-receiving" type="b">
+      <default>false</default>
+    </key>
+
+    <key name="rtp-devices" type="a{sv}">
+      <default>{}</default>
     </key>
   </schema>
 </schemalist>

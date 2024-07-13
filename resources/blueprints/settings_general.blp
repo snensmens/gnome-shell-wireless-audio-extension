@@ -6,8 +6,30 @@ template $GeneralSettings : Adw.PreferencesPage {
   icon-name: "settings-symbolic";
 
   Adw.PreferencesGroup general_preferences {
+    title: _("Allgemein");
+
     Adw.SwitchRow show_icon {
-      title: _("Icon in der Kopfleiste anzeigen");
+      title: _("Icon in Kopfleiste anzeigen");
+    }
+  }
+
+  Adw.PreferencesGroup airplay_preferences {
+    title: _("AirPlay");
+
+    Adw.SwitchRow enable_airplay {
+      title: _("AirPlay Geräte anzeigen");
+    }
+  }
+
+  Adw.PreferencesGroup rtp_preferences {
+    title: _("RTP");
+
+    Adw.SwitchRow enable_rtp_sending {
+      title: _("Audio über RTP senden");
+    }
+
+    Adw.SwitchRow enable_rtp_receiving {
+      title: _("Audio auf diesem Gerät empfangen");
     }
   }
 

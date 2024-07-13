@@ -9,7 +9,7 @@ export class AirPlayController {
         this.isEnabled = () => this.moduleID != null;
         
         // check if airplay-discovery-module is already loaded
-        const enabledModulesQuery = execute('sh -c "pactl list modules short | grep module-raop-discover | awk \'{print $1}\'"');
+        const enabledModulesQuery = execute(`sh -c "pactl list modules short | grep module-raop-discover | awk '{print $1}'"`);
 
         if (enabledModulesQuery.wasSuccessful) {
             if (enabledModulesQuery.result !== '') {

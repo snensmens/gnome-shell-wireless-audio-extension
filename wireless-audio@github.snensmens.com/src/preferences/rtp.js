@@ -19,22 +19,12 @@ export const RTPSettings = GObject.registerClass({
         this.groups = [];
         
         this.settings = settings;
-        // todo: check if active when initializing page
-        this.settings.connect('changed::extension-active', () => {
-            this.set_sensitive(!this.settings.get_boolean("extension-active"));
-            
-            if(this.settings.get_boolean("extension-active")) {
-                this._control.set_description("Die Konfiguration ist nicht verfügbar solange die Erweiterung aktiv ist");
-            } else {
-                this._control.set_description("");
-            }
-        });
         
         this._add_group_button.connect("activated", () => {
             this.showInputDialog({
-                heading: "Neue Gruppe erstellen",
-                body: "Der Name der Gruppe ist der Name der im Sound-Chooser angezeigt wird",
-                label: "Gruppenname",
+                heading: "Add new group",
+                body: "The groupname will be shown in the sound-output-chooser",
+                label: "Groupname",
                 onConfirm: (name) => {
                     this.addRtpGroup({
                         name: name
@@ -52,24 +42,25 @@ export const RTPSettings = GObject.registerClass({
                 devices: group.devices
             });
         });
+
     }
-    
+
     addRtpGroup({name, devices}) {
         const group = new RtpGroup({
             name: name,
             devices: devices ? devices : [],
             onAddDevice: (self) => this.showDeviceDialog({
-                heading: "Gerät hinzufügen",
-                body: `Füge ${self.name} ein neues Gerät hinzu`,
+                heading: "Add device",
+                body: `Add a new device to ${self.name}`,
                 onConfirm: (device) => {
                     self.addDevice(device);
                     this.saveConfiguration();
                 }
             }),
             onEditGroup: (self) => this.showInputDialog({
-                heading: "Gruppe bearbeiten",
-                body: "Name der Gruppe anpassen",
-                label: "Gruppenname",
+                heading: "Edit group",
+                body: "Edit Groupname",
+                label: "Groupname",
                 text: self.name,
                 onConfirm: (editedName) => {
                     self.setName(editedName);
@@ -77,8 +68,8 @@ export const RTPSettings = GObject.registerClass({
                 }
             }),
             onEditDevice: (device) => this.showDeviceDialog({
-                heading: "Gerät bearbeiten",
-                body: "Gerätedaten anpassen",
+                heading: "Edit device",
+                body: "Edit device properties",
                 name: device.name,
                 address: device.address,
                 onConfirm: (changed) => {
@@ -129,8 +120,8 @@ export const RTPSettings = GObject.registerClass({
         });
         box.append(inputField);
         
-        dialog.add_response("cancel", "Abbrechen");
-        dialog.add_response("confirm", text ? "Anpassen" : "Erstellen");
+        dialog.add_response("cancel", "Cancel");
+        dialog.add_response("confirm", "Confirm");
         dialog.set_response_appearance("confirm", Adw.ResponseAppearance.SUGGESTED);
         dialog.set_response_enabled("confirm", false);
         
@@ -155,13 +146,13 @@ export const RTPSettings = GObject.registerClass({
         dialog.set_extra_child(box);
         
         const nameField = new Adw.EntryRow({
-            title: "Gerätename",
+            title: "Devicename",
             text: name ? name : ""
         });
         box.append(nameField);
         
         const addressField = new Adw.EntryRow({
-            title: "IP-Addresse",
+            title: "IP-Address",
             text: address ? address : ""
         });
         box.append(addressField);
@@ -174,8 +165,8 @@ export const RTPSettings = GObject.registerClass({
             dialog.set_response_enabled("confirm", this.isValidInput(nameField.get_text()) && this.isValidInput(addressField.get_text()));
         });
         
-        dialog.add_response("cancel", "Abbrechen");
-        dialog.add_response("confirm", name ? "Anpassen" : "Erstellen");
+        dialog.add_response("cancel", "Cancel");
+        dialog.add_response("confirm", "Confirm");
         dialog.set_response_appearance("confirm", Adw.ResponseAppearance.SUGGESTED);
         dialog.set_response_enabled("confirm", false);
         
@@ -280,7 +271,6 @@ const RtpDevice = GObject.registerClass({
             this.name = name;
             this.address = address;
             
-            const box = new Gtk.Box();
             const editButton = new Gtk.Button({icon_name: "edit-symbolic", halign: Gtk.Align.CENTER, valign: Gtk.Align.CENTER});
             editButton.connect("clicked", () => onEdit(this));
             this.add_suffix(editButton);

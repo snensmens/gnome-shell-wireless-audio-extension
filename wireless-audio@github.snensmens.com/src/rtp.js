@@ -1,4 +1,3 @@
-import GObject from 'gi://GObject';
 import Json from 'gi://Json';
 
 import {execute} from './command.js';
@@ -7,17 +6,20 @@ import {execute} from './command.js';
 export class RtpReceiveController {
     constructor() {
         this.moduleId = null;
+        this.isEnabled = () => this.moduleID != null;
     }
     
     enable() {
-        const enableRtpReceivingAttempt = execute(`pactl load-module module-rtp-recv latency_msec=15 sap_address=0.0.0.0`);
-        if(enableRtpReceivingAttempt.wasSuccessful) {
-            this.moduleId = enableRtpReceivingAttempt.result;
+        if(!this.isEnabled()) {
+            const enableRtpReceivingAttempt = execute(`pactl load-module module-rtp-recv latency_msec=15 sap_address=0.0.0.0`);
+            if(enableRtpReceivingAttempt.wasSuccessful) {
+                this.moduleId = enableRtpReceivingAttempt.result;
+            }
         }
     }
     
     disable() {
-        if(this.moduleId) {
+        if(this.isEnabled()) {
             execute(`pactl unload-module ${this.moduleId}`);
         }
     }
@@ -52,6 +54,12 @@ export class RtpSendController {
             group.unload();
         });
     }
+
+    enableGroupIfActive(defaultSink) {
+        this.groups.forEach((group) => {
+            group.moduleName === defaultSink ? group.loadDevices() : group.unloadDevices()
+        });
+    }
 }
 
 class RtpGroup {
@@ -59,6 +67,7 @@ class RtpGroup {
         this.name = name;
         this.moduleName = name.replace(/\s+/g, '');
         this.moduleId = null;
+        this.isEnabled = () => this.moduleID != null;
         
         this.devices = devices.map((device) => new RtpDevice({
             monitor: this.moduleName,
@@ -67,20 +76,29 @@ class RtpGroup {
     }
     
     load() {
-        const loadModuleAttempt = execute(`pactl load-module module-null-sink sink_name="${this.moduleName}" sink_properties="'device.description=\\"${this.name}\\"'"`);
-        if(loadModuleAttempt.wasSuccessful) {
-            this.moduleId = loadModuleAttempt.result;
-            
-            this.devices.forEach(device => device.load());
+        if(!this.isEnabled()) {
+            const loadModuleAttempt = execute(`pactl load-module module-null-sink sink_name="${this.moduleName}" sink_properties="'device.description=\\"${this.name}\\"'"`);
+            if(loadModuleAttempt.wasSuccessful) {
+                this.moduleId = loadModuleAttempt.result;
+            }
         }
     }
-    
+
+    loadDevices() {
+        this.devices.forEach(device => device.load());
+    }
+
     unload() {
-        this.devices.forEach(device => device.unload());
-        
-        if(this.moduleId) {
+        this.unloadDevices();
+
+        if(this.isEnabled()) {
             execute(`pactl unload-module ${this.moduleId}`);
+            this.moduleId = null;
         }
+    }
+
+    unloadDevices() {
+        this.devices.forEach(device => device.unload());
     }
 }
 
@@ -90,18 +108,26 @@ class RtpDevice {
         this.monitor = monitor;
         this.address = address;
         this.moduleId = null;
+        this.isEnabled = () => this.moduleID != null;
     }
-    
+
     load() {
-        const loadRtpSendModuleAttempt = execute(`pactl load-module module-rtp-send source="${this.monitor}".monitor destination_ip=${this.address}`);
-        if(loadRtpSendModuleAttempt.wasSuccessful) {
-            this.moduleId = loadRtpSendModuleAttempt.result;
+        if(!this.isEnabled()) {
+            console.log("loading device", this.address);
+            const loadRtpSendModuleAttempt = execute(`pactl load-module module-rtp-send source="${this.monitor}".monitor destination_ip=${this.address}`);
+            if(loadRtpSendModuleAttempt.wasSuccessful) {
+                this.moduleId = loadRtpSendModuleAttempt.result;
+            }
         }
     }
     
     unload() {
-        if(this.moduleId) {
-            execute(`pactl unload-module ${this.moduleId}`);
+        if(this.isEnabled()) {
+            console.log("unloading device", this.address);
+            const unloadModuleAttempt = execute(`pactl unload-module ${this.moduleId}`);
+            if(unloadModuleAttempt.wasSuccessful) {
+                this.moduleId = null;
+            }
         }
     }
 }

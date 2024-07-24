@@ -9,4 +9,11 @@ export class PactlController {
         return checkPactlVersionQuery.wasSuccessful;
     }
     
+    // get the current default sink
+    getDefaultSink() {
+        const defaultSinkQuery = execute("pactl get-default-sink")
+        if (defaultSinkQuery.wasSuccessful) {
+            return defaultSinkQuery.result.trim();
+        }
+    }
 }

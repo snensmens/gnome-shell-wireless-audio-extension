@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
   <schema id="org.gnome.shell.extensions.wireless-audio" path="/org/gnome/shell/extensions/wireless-audio/">
-    <key name="extension-active" type="b">
-      <default>false</default>
-    </key>
-
     <key name="show-icon" type="b">
       <default>false</default>
     </key>

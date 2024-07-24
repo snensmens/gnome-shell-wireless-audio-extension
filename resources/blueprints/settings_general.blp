@@ -2,34 +2,34 @@ using Gtk 4.0;
 using Adw 1;
 
 template $GeneralSettings : Adw.PreferencesPage {
-  title: _("Allgemein");
-  icon-name: "settings-symbolic";
+  title: _("General");
+  icon-name: "preferences-system-symbolic";
 
   Adw.PreferencesGroup general_preferences {
-    title: _("Allgemein");
+    title: _("General Settings");
 
     Adw.SwitchRow show_icon {
-      title: _("Icon in Kopfleiste anzeigen");
+      title: _("Show Icon in Topbar");
     }
   }
 
   Adw.PreferencesGroup airplay_preferences {
-    title: _("AirPlay");
+    title: _("AirPlay Settings");
 
     Adw.SwitchRow enable_airplay {
-      title: _("AirPlay Geräte anzeigen");
+      title: _("Discover AirPlay Devices");
     }
   }
 
   Adw.PreferencesGroup rtp_preferences {
-    title: _("RTP");
+    title: _("RTP Settings");
 
     Adw.SwitchRow enable_rtp_sending {
-      title: _("Audio über RTP senden");
+      title: _("Stream audio to other devices");
     }
 
     Adw.SwitchRow enable_rtp_receiving {
-      title: _("Audio auf diesem Gerät empfangen");
+      title: _("Receive audiostreams on this device");
     }
   }
 
@@ -39,10 +39,10 @@ template $GeneralSettings : Adw.PreferencesPage {
       valign: center;
 
       Label {
-        label: _("Diese Erweiterung erfordert die Installation von pactl");
+        label: _("This Extension requires pactl to be installed");
       }
       LinkButton {
-        label: _("Setup-Anleitung anzeigen");
+        label: _("Show setup instructions");
         uri: "https://gjs.guide/guides/gio/actions-and-menus.html";
       }
     }

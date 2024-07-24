@@ -2,12 +2,15 @@ using Gtk 4.0;
 using Adw 1;
 
 template $RTPSettings : Adw.PreferencesPage {
-  title: _("RTP Geräte");
-  icon-name: "speaker-symbolic";
+  title: _("RTP Devices");
+  icon-name: "audio-speakers-symbolic";
 
   Adw.PreferencesGroup control {
+    title: _("Changes will take effect next time the extension is activated");
+    styles ["accent"];
+
     Adw.ActionRow add_group_button {
-      title: _("Neue Gruppe erstellen");
+      title: _("Add new Group");
       activatable-widget: add;
 
       [suffix]

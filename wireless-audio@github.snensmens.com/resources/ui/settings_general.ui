@@ -7,39 +7,39 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
 <interface>
   <requires lib="gtk" version="4.0"/>
   <template class="GeneralSettings" parent="AdwPreferencesPage">
-    <property name="title" translatable="true">Allgemein</property>
-    <property name="icon-name">settings-symbolic</property>
+    <property name="title" translatable="true">General</property>
+    <property name="icon-name">preferences-system-symbolic</property>
     <child>
       <object class="AdwPreferencesGroup" id="general_preferences">
-        <property name="title" translatable="true">Allgemein</property>
+        <property name="title" translatable="true">General Settings</property>
         <child>
           <object class="AdwSwitchRow" id="show_icon">
-            <property name="title" translatable="true">Icon in Kopfleiste anzeigen</property>
+            <property name="title" translatable="true">Show Icon in Topbar</property>
           </object>
         </child>
       </object>
     </child>
     <child>
       <object class="AdwPreferencesGroup" id="airplay_preferences">
-        <property name="title" translatable="true">AirPlay</property>
+        <property name="title" translatable="true">AirPlay Settings</property>
         <child>
           <object class="AdwSwitchRow" id="enable_airplay">
-            <property name="title" translatable="true">AirPlay Geräte anzeigen</property>
+            <property name="title" translatable="true">Discover AirPlay Devices</property>
           </object>
         </child>
       </object>
     </child>
     <child>
       <object class="AdwPreferencesGroup" id="rtp_preferences">
-        <property name="title" translatable="true">RTP</property>
+        <property name="title" translatable="true">RTP Settings</property>
         <child>
           <object class="AdwSwitchRow" id="enable_rtp_sending">
-            <property name="title" translatable="true">Audio über RTP senden</property>
+            <property name="title" translatable="true">Stream audio to other devices</property>
           </object>
         </child>
         <child>
           <object class="AdwSwitchRow" id="enable_rtp_receiving">
-            <property name="title" translatable="true">Audio auf diesem Gerät empfangen</property>
+            <property name="title" translatable="true">Receive audiostreams on this device</property>
           </object>
         </child>
       </object>
@@ -52,12 +52,12 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
             <property name="valign">3</property>
             <child>
               <object class="GtkLabel">
-                <property name="label" translatable="true">Diese Erweiterung erfordert die Installation von pactl</property>
+                <property name="label" translatable="true">This Extension requires pactl to be installed</property>
               </object>
             </child>
             <child>
               <object class="GtkLinkButton">
-                <property name="label" translatable="true">Setup-Anleitung anzeigen</property>
+                <property name="label" translatable="true">Show setup instructions</property>
                 <property name="uri">https://gjs.guide/guides/gio/actions-and-menus.html</property>
               </object>
             </child>

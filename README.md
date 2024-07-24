@@ -1,9 +1,20 @@
 # gnome-shell-wireless-audio-extension
-Discover AirPlay Devices and make them available as audio-outputs
 
-## Important
-This extension requires `pactl` to be installed on your system
-- For Fedora Workstation install it with `dnf install pulseaudio-utils`
-- For Ubuntu use `apt install pulseaudio-utils`
+Extension for the GNOME Desktop that allows you to
+- Discover and use AirPlay Devices
+- Stream your audio to other Devices with RTP
+- Receive RTP audio streams on your Device
 
-To check if pactl is installed on your system run `pactl --version`.
+**This extension requires `pactl` to be installed on your system.
+To check if it's installed run `pactl --version`.**
+
+
+## Limitations
+- Using AirPlay-Devices with passwords is not supported
+
+## Compatability Chart
+
+|                                            Device                                            | Compatible? |
+|:--------------------------------------------------------------------------------------------:|:-----------:|
+|                                          AppleTV 4K                                          |      ❌      |
+| [shairport-sync](https://github.com/mikebrady/shairport-sync) (Tested on Rasperry Pi Zero W) |     ✔️      |

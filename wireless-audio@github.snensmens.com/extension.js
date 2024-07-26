@@ -42,7 +42,7 @@ class WirelessAudioQuickToggle extends QuickToggle {
 
 const WirelessAudioIndicator = GObject.registerClass(
 class WirelessAudioIndicator extends SystemIndicator {
-    constructor(showIconInTopbar, icon) {
+    constructor(showIconInTopBar, icon) {
         super();
 
         this._indicator = this._addIndicator();
@@ -50,7 +50,7 @@ class WirelessAudioIndicator extends SystemIndicator {
         
         this.toggle = new WirelessAudioQuickToggle(icon);
 
-        this.visible = showIconInTopbar && this.toggle.checked;
+        this.visible = showIconInTopBar && this.toggle.checked;
         this.quickSettingsItems.push(this.toggle);
     }
 });
@@ -64,92 +64,97 @@ export default class QuickSettingsAirPlayExtension extends Extension {
         this._enable_rtp_sending_signal = null;
         this._enable_rtp_receiving_signal = null;
         this._rtp_devices_changed_signal = null;
-        this.checkDefaultSinkInterval = null;
+        this._checkDefaultSinkInterval = null;
 
         this._appIcon = Gio.icon_new_for_string(`${this.path}/resources/icons/hicolor/scalable/actions/speaker-wireless-symbolic.svg`);
         this._settings = this.getSettings();
 
-        this.pactl = new PactlController();
-        this.airplay = new AirPlayController();
-        this.rtpSend = new RtpSendController(this._settings);
-        this.rtpReceive = new RtpReceiveController();
+        this._pactl = new PactlController();
+        this._airplay = new AirPlayController();
+        this._rtpSend = new RtpSendController(this._settings);
+        this._rtpReceive = new RtpReceiveController();
 
         this._indicator = new WirelessAudioIndicator(this._settings.get_boolean("show-icon"), this._appIcon);
-        this.toggle = this._indicator.toggle;
+        this._toggle = this._indicator.toggle;
 
         Main.panel.statusArea.quickSettings.addExternalIndicator(this._indicator);
 
-        if( this.pactl.isInstalled() ) {
+        if(this._pactl.isInstalled()) {
 
             // observe the toggle state
-            this._toggle_checked_signal = this.toggle.connect("notify::checked", () => {
-                this.toggle.checked && this._settings.get_boolean("show-icon") ?
+            this._toggle_checked_signal = this._toggle.connect("notify::checked", () => {
+                this._toggle.checked && this._settings.get_boolean("show-icon") ?
                     this.showTopbarIcon() : this.hideTopbarIcon();
 
-                this.toggle.checked && this._settings.get_boolean("enable-airplay") ?
-                    this.airplay.enable() : this.airplay.disable();
+                this._toggle.checked && this._settings.get_boolean("enable-airplay") ?
+                    this._airplay.enable() : this._airplay.disable();
 
-                this.toggle.checked && this._settings.get_boolean("enable-rtp-sending") ?
+                this._toggle.checked && this._settings.get_boolean("enable-rtp-sending") ?
                     this.enableRtpSend() : this.disableRtpSend();
 
-                this.toggle.checked && this._settings.get_boolean("enable-rtp-receiving") ?
+                this._toggle.checked && this._settings.get_boolean("enable-rtp-receiving") ?
                     this.enableRtpReceive() : this.disableRtpReceive();
             });
 
             // observe the states of the settings
             this._show_icon_signal = this._settings.connect("changed::show-icon", () => {
-                this._settings.get_boolean("show-icon") && this.toggle.checked ?
+                this._settings.get_boolean("show-icon") && this._toggle.checked ?
                     this.showTopbarIcon() : this.hideTopbarIcon();
             });
 
             this._enable_airplay_signal = this._settings.connect("changed::enable-airplay", () => {
-                this._settings.get_boolean("enable-airplay") && this.toggle.checked ?
-                    this.airplay.enable() : this.airplay.disable();
+                this._settings.get_boolean("enable-airplay") && this._toggle.checked ?
+                    this._airplay.enable() : this._airplay.disable();
             });
 
             this._enable_rtp_sending_signal = this._settings.connect("changed::enable-rtp-sending", () => {
-                this._settings.get_boolean("enable-rtp-sending") && this.toggle.checked ?
+                this._settings.get_boolean("enable-rtp-sending") && this._toggle.checked ?
                     this.enableRtpSend() : this.disableRtpSend();
             });
 
             this._enable_rtp_receiving_signal = this._settings.connect("changed::enable-rtp-receiving", () => {
-                this._settings.get_boolean("enable-rtp-receiving") && this.toggle.checked ?
+                this._settings.get_boolean("enable-rtp-receiving") && this._toggle.checked ?
                     this.enableRtpReceive() : this.disableRtpReceive();
             });
 
             this._rtp_devices_changed_signal = this._settings.connect("changed::rtp-devices", () => {
-                if(this.toggle.checked) {
-                    this.rtpSend.disable();
-                    this.rtpSend.enable();
+                if(this._toggle.checked) {
+                    this._rtpSend.disable();
+                    this._rtpSend.enable();
                 }
             });
         }
     }
 
+    /*
+    * sometimes audio over rtp is still playing even if the sink is not selected as output anymore.
+    * as a get-around we periodically check the current default sink to deactivate rtp sinks when they are not selected anymore.
+    * */
     createDefaultSinkObserver() {
-        return setInterval(() => this.rtpSend.enableGroupIfActive(this.pactl.getDefaultSink()), 500);
+        return setInterval(() => this._rtpSend.enableGroupIfActive(this._pactl.getDefaultSink()), 500);
     }
 
     enableRtpSend() {
-        this.rtpSend.enable();
-        this.checkDefaultSinkInterval = this.createDefaultSinkObserver();
+        this._rtpSend.enable();
+        this._checkDefaultSinkInterval = this.createDefaultSinkObserver();
     }
 
     disableRtpSend() {
-        if(this.checkDefaultSinkInterval) {
-            clearInterval(this.checkDefaultSinkInterval);
+        if(this._checkDefaultSinkInterval) {
+            clearInterval(this._checkDefaultSinkInterval);
         }
         this.checkDefaultSinkInterval = null;
-        this.rtpSend.disable();
+
+        this._rtpSend.disable();
     }
 
     enableRtpReceive() {
-        this.rtpReceive.enable();
+        this._rtpReceive.enable();
         Main.osdWindowManager.show(-1, this._appIcon, _("Your Device is now available as audio receiver"), null, null);
     }
 
     disableRtpReceive() {
-        this.rtpReceive.disable();
+        this._rtpReceive.disable();
     }
 
     showTopbarIcon() {
@@ -162,14 +167,14 @@ export default class QuickSettingsAirPlayExtension extends Extension {
 
     disable() {
         // clear the interval if its running
-        if(this.checkDefaultSinkInterval) {
-            clearInterval(this.checkDefaultSinkInterval);
-            this.checkDefaultSinkInterval = null;
+        if(this._checkDefaultSinkInterval) {
+            clearInterval(this._checkDefaultSinkInterval);
+            this._checkDefaultSinkInterval = null;
         }
 
         // disconnect signals
         if (this._toggle_checked_signal) {
-            this.toggle.disconnect(this._toggle_checked_signal);
+            this._toggle.disconnect(this._toggle_checked_signal);
             this._toggle_checked_signal = null;
         }
         if (this._show_icon_signal) {
@@ -194,16 +199,16 @@ export default class QuickSettingsAirPlayExtension extends Extension {
         }
 
         // disable all controllers
-        this.airplay.disable();
-        this.rtpSend.disable();
-        this.rtpReceive.disable();
+        this._airplay.disable();
+        this._rtpSend.disable();
+        this._rtpReceive.disable();
 
         this._indicator.quickSettingsItems.forEach(item => item.destroy());
         this._indicator.destroy();
         
-        this.pactl = null;
-        this.airplay = null;
-        this.rtpSend = null;
+        this._pactl = null;
+        this._airplay = null;
+        this._rtpSend = null;
         this._settings = null;
         this._appIcon = null;
     }

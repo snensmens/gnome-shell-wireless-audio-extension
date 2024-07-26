@@ -2,7 +2,7 @@
 
 Extension for the GNOME Desktop that allows you to
 - Discover and use AirPlay capable Devices
-- Stream your audio to other Devices with RTP
+- Stream your audio to (multiple) other Devices with RTP
 - Receive RTP audio streams on your Device
 
 **This extension requires `pactl` to be installed on your system.

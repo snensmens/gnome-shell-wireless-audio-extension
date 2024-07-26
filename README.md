@@ -1,7 +1,7 @@
 # gnome-shell-wireless-audio-extension
 
 Extension for the GNOME Desktop that allows you to
-- Discover and use AirPlay Devices
+- Discover and use AirPlay capable Devices
 - Stream your audio to other Devices with RTP
 - Receive RTP audio streams on your Device
 

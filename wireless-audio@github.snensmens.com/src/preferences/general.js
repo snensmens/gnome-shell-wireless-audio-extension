@@ -16,6 +16,7 @@ export const GeneralSettings = GObject.registerClass({
         "enable_airplay",
         "enable_rtp_sending",
         "enable_rtp_receiving",
+        "latency",
         "installation_hint",
     ],
 }, class GeneralSettings extends Adw.PreferencesPage {
@@ -27,6 +28,7 @@ export const GeneralSettings = GObject.registerClass({
         this.settings.bind("enable-airplay", this._enable_airplay, "active", Gio.SettingsBindFlags.DEFAULT);
         this.settings.bind("enable-rtp-sending", this._enable_rtp_sending, "active", Gio.SettingsBindFlags.DEFAULT);
         this.settings.bind("enable-rtp-receiving", this._enable_rtp_receiving, "active", Gio.SettingsBindFlags.DEFAULT);
+        this.settings.bind("latency", this._latency, "value", Gio.SettingsBindFlags.DEFAULT);
 
         this.settings.connect("changed::enable-rtp-receiving", () => {
             this.showIpAddressIfEnabled();

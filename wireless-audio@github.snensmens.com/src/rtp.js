@@ -10,11 +10,11 @@ export class RtpReceiveController {
     }
 
     /**
-     * load a rtp-receive module to receive audio on this device
+     * load a rtp-receive module to receive audio on this device with a given latency
      * */
-    enable() {
+    enable(latency) {
         if(!this.isEnabled()) {
-            const enableRtpReceivingAttempt = execute(`pactl load-module module-rtp-recv latency_msec=15 sap_address=0.0.0.0`);
+            const enableRtpReceivingAttempt = execute(`pactl load-module module-rtp-recv latency_msec=${latency} sap_address=0.0.0.0`);
             if(enableRtpReceivingAttempt.wasSuccessful) {
                 this.moduleId = enableRtpReceivingAttempt.result;
             }
@@ -27,6 +27,7 @@ export class RtpReceiveController {
     disable() {
         if(this.isEnabled()) {
             execute(`pactl unload-module ${this.moduleId}`);
+            this.moduleId = null;
         }
     }
 }

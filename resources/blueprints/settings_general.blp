@@ -31,6 +31,20 @@ template $GeneralSettings : Adw.PreferencesPage {
     Adw.SwitchRow enable_rtp_receiving {
       title: _("Receive audio on this device");
     }
+
+    Adw.SpinRow latency {
+      title: _("Latency in ms");
+      visible: bind enable_rtp_receiving.active;
+      subtitle: _("Increasing the latency can help with crackling audio");
+      climb-rate: 0.2;
+
+      adjustment: Adjustment {
+        lower: 1;
+        upper: 3500;
+        step-increment: 10;
+        value: 20;
+      };
+    }
   }
 
   Adw.PreferencesGroup installation_hint {

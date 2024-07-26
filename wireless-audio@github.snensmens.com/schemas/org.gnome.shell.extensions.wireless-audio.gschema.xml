@@ -20,5 +20,9 @@
     <key name="rtp-devices" type="a{sv}">
       <default>{}</default>
     </key>
+
+    <key name="latency" type="i">
+      <default>15</default>
+    </key>
   </schema>
 </schemalist>

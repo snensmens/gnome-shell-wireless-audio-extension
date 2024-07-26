@@ -64,6 +64,7 @@ export default class QuickSettingsAirPlayExtension extends Extension {
         this._enable_rtp_sending_signal = null;
         this._enable_rtp_receiving_signal = null;
         this._rtp_devices_changed_signal = null;
+        this._latency_changed_signal = null;
         this._checkDefaultSinkInterval = null;
 
         this._appIcon = Gio.icon_new_for_string(`${this.path}/resources/icons/hicolor/scalable/actions/speaker-wireless-symbolic.svg`);
@@ -93,7 +94,7 @@ export default class QuickSettingsAirPlayExtension extends Extension {
                     this.enableRtpSend() : this.disableRtpSend();
 
                 this._toggle.checked && this._settings.get_boolean("enable-rtp-receiving") ?
-                    this.enableRtpReceive() : this.disableRtpReceive();
+                    this.enableRtpReceive(this._settings.get_int64("latency")) : this.disableRtpReceive();
             });
 
             // observe the states of the settings
@@ -115,6 +116,13 @@ export default class QuickSettingsAirPlayExtension extends Extension {
             this._enable_rtp_receiving_signal = this._settings.connect("changed::enable-rtp-receiving", () => {
                 this._settings.get_boolean("enable-rtp-receiving") && this._toggle.checked ?
                     this.enableRtpReceive() : this.disableRtpReceive();
+            });
+
+            this._latency_changed_signal = this._settings.connect("changed::latency", () => {
+                if(this._settings.get_boolean("enable-rtp-receiving")) {
+                    this.disableRtpReceive();
+                    this.enableRtpReceive(false);
+                }
             });
 
             this._rtp_devices_changed_signal = this._settings.connect("changed::rtp-devices", () => {
@@ -143,14 +151,17 @@ export default class QuickSettingsAirPlayExtension extends Extension {
         if(this._checkDefaultSinkInterval) {
             clearInterval(this._checkDefaultSinkInterval);
         }
-        this.checkDefaultSinkInterval = null;
+        this._checkDefaultSinkInterval = null;
 
         this._rtpSend.disable();
     }
 
-    enableRtpReceive() {
-        this._rtpReceive.enable();
-        Main.osdWindowManager.show(-1, this._appIcon, _("Your Device is now available as audio receiver"), null, null);
+    enableRtpReceive(informUser= true) {
+        this._rtpReceive.enable(this._settings.get_int("latency"));
+
+        if(informUser) {
+            Main.osdWindowManager.show(-1, this._appIcon, _("Your Device is now available as audio receiver"), null, null);
+        }
     }
 
     disableRtpReceive() {
@@ -173,29 +184,33 @@ export default class QuickSettingsAirPlayExtension extends Extension {
         }
 
         // disconnect signals
-        if (this._toggle_checked_signal) {
+        if(this._toggle_checked_signal) {
             this._toggle.disconnect(this._toggle_checked_signal);
             this._toggle_checked_signal = null;
         }
-        if (this._show_icon_signal) {
+        if(this._show_icon_signal) {
             this._settings.disconnect(this._show_icon_signal);
             this._show_icon_signal = null;
         }
-        if (this._enable_airplay_signal) {
+        if(this._enable_airplay_signal) {
             this._settings.disconnect(this._enable_airplay_signal);
             this._enable_airplay_signal = null;
         }
-        if (this._enable_rtp_sending_signal) {
+        if(this._enable_rtp_sending_signal) {
             this._settings.disconnect(this._enable_rtp_sending_signal);
             this._enable_rtp_sending_signal = null;
         }
-        if (this._enable_rtp_receiving_signal) {
+        if(this._enable_rtp_receiving_signal) {
             this._settings.disconnect(this._enable_rtp_receiving_signal);
             this._enable_rtp_receiving_signal = null;
         }
-        if (this._rtp_devices_changed_signal) {
+        if(this._rtp_devices_changed_signal) {
             this._settings.disconnect(this._rtp_devices_changed_signal);
             this._rtp_devices_changed_signal = null;
+        }
+        if(this._latency_changed_signal) {
+            this._settings.disconnect(this._latency_changed_signal);
+            this._latency_changed_signal = null;
         }
 
         // disable all controllers

@@ -42,6 +42,22 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
             <property name="title" translatable="true">Receive audio on this device</property>
           </object>
         </child>
+        <child>
+          <object class="AdwSpinRow" id="latency">
+            <property name="title" translatable="true">Latency in ms</property>
+            <property name="visible" bind-source="enable_rtp_receiving" bind-property="active" bind-flags="sync-create"/>
+            <property name="subtitle" translatable="true">Increasing the latency can help with crackling audio</property>
+            <property name="climb-rate">0.2</property>
+            <property name="adjustment">
+              <object class="GtkAdjustment">
+                <property name="lower">1</property>
+                <property name="upper">3500</property>
+                <property name="step-increment">10</property>
+                <property name="value">20</property>
+              </object>
+            </property>
+          </object>
+        </child>
       </object>
     </child>
     <child>

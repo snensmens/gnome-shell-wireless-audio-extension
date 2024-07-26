@@ -14,24 +14,24 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
         <property name="title" translatable="true">General Settings</property>
         <child>
           <object class="AdwSwitchRow" id="show_icon">
-            <property name="title" translatable="true">Show Icon in Topbar</property>
+            <property name="title" translatable="true">Show indicator in the top bar when the extension is active</property>
           </object>
         </child>
       </object>
     </child>
     <child>
       <object class="AdwPreferencesGroup" id="airplay_preferences">
-        <property name="title" translatable="true">AirPlay Settings</property>
+        <property name="title" translatable="true">AirPlay</property>
         <child>
           <object class="AdwSwitchRow" id="enable_airplay">
-            <property name="title" translatable="true">Discover AirPlay Devices</property>
+            <property name="title" translatable="true">Discover AirPlay-capable devices</property>
           </object>
         </child>
       </object>
     </child>
     <child>
       <object class="AdwPreferencesGroup" id="rtp_preferences">
-        <property name="title" translatable="true">RTP Settings</property>
+        <property name="title" translatable="true">RTP</property>
         <child>
           <object class="AdwSwitchRow" id="enable_rtp_sending">
             <property name="title" translatable="true">Stream audio to other devices</property>
@@ -39,7 +39,7 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
         </child>
         <child>
           <object class="AdwSwitchRow" id="enable_rtp_receiving">
-            <property name="title" translatable="true">Receive audiostreams on this device</property>
+            <property name="title" translatable="true">Receive audio on this device</property>
           </object>
         </child>
       </object>
@@ -53,12 +53,6 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
             <child>
               <object class="GtkLabel">
                 <property name="label" translatable="true">This Extension requires pactl to be installed</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkLinkButton">
-                <property name="label" translatable="true">Show setup instructions</property>
-                <property name="uri">https://gjs.guide/guides/gio/actions-and-menus.html</property>
               </object>
             </child>
           </object>

@@ -1,16 +1,17 @@
-import Gtk from 'gi://Gtk';
-import Adw from 'gi://Adw';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import Json from 'gi://Json';
+import Gtk from "gi://Gtk";
+import Adw from "gi://Adw";
+import GLib from "gi://GLib";
+import GObject from "gi://GObject";
+import Json from "gi://Json";
+import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 
 export const RTPSettings = GObject.registerClass({
-    GTypeName: 'RTPSettings',
-    Template: GLib.uri_resolve_relative(import.meta.url, '../../resources/ui/settings_rtp.ui', GLib.UriFlags.NONE),
+    GTypeName: "RTPSettings",
+    Template: GLib.uri_resolve_relative(import.meta.url, "../../resources/ui/settings_rtp.ui", GLib.UriFlags.NONE),
     InternalChildren: [
-        'control',
-        'add_group_button',
+        "control",
+        "add_group_button",
     ],
 }, class RTPSettings extends Adw.PreferencesPage {
     constructor(settings) {
@@ -22,9 +23,9 @@ export const RTPSettings = GObject.registerClass({
         
         this._add_group_button.connect("activated", () => {
             this.showInputDialog({
-                heading: "Add new group",
-                body: "The groupname will be shown in the sound-output-chooser",
-                label: "Groupname",
+                heading: _("Add new group"),
+                body: _("The group name will be shown in the sound-output-chooser"),
+                label: _("Group name"),
                 onConfirm: (name) => {
                     this.addRtpGroup({
                         name: name
@@ -50,17 +51,17 @@ export const RTPSettings = GObject.registerClass({
             name: name,
             devices: devices ? devices : [],
             onAddDevice: (self) => this.showDeviceDialog({
-                heading: "Add device",
-                body: `Add a new device to ${self.name}`,
+                heading: _("Add device"),
+                body: _(`Add a new device to ${self.name}`),
                 onConfirm: (device) => {
                     self.addDevice(device);
                     this.saveConfiguration();
                 }
             }),
             onEditGroup: (self) => this.showInputDialog({
-                heading: "Edit group",
-                body: "Edit Groupname",
-                label: "Groupname",
+                heading: _("Edit group"),
+                body: _("Edit group name"),
+                label: _("Group name"),
                 text: self.name,
                 onConfirm: (editedName) => {
                     self.setName(editedName);
@@ -68,8 +69,8 @@ export const RTPSettings = GObject.registerClass({
                 }
             }),
             onEditDevice: (device) => this.showDeviceDialog({
-                heading: "Edit device",
-                body: "Edit device properties",
+                heading: _("Edit device"),
+                body: _("Edit device properties"),
                 name: device.name,
                 address: device.address,
                 onConfirm: (changed) => {
@@ -120,8 +121,8 @@ export const RTPSettings = GObject.registerClass({
         });
         box.append(inputField);
         
-        dialog.add_response("cancel", "Cancel");
-        dialog.add_response("confirm", "Confirm");
+        dialog.add_response("cancel", _("Cancel"));
+        dialog.add_response("confirm", _("Confirm"));
         dialog.set_response_appearance("confirm", Adw.ResponseAppearance.SUGGESTED);
         dialog.set_response_enabled("confirm", false);
         
@@ -146,13 +147,13 @@ export const RTPSettings = GObject.registerClass({
         dialog.set_extra_child(box);
         
         const nameField = new Adw.EntryRow({
-            title: "Devicename",
+            title: _("Device name"),
             text: name ? name : ""
         });
         box.append(nameField);
         
         const addressField = new Adw.EntryRow({
-            title: "IP-Address",
+            title: _("IP-Address"),
             text: address ? address : ""
         });
         box.append(addressField);
@@ -165,8 +166,8 @@ export const RTPSettings = GObject.registerClass({
             dialog.set_response_enabled("confirm", this.isValidInput(nameField.get_text()) && this.isValidInput(addressField.get_text()));
         });
         
-        dialog.add_response("cancel", "Cancel");
-        dialog.add_response("confirm", "Confirm");
+        dialog.add_response("cancel", _("Cancel"));
+        dialog.add_response("confirm", _("Confirm"));
         dialog.set_response_appearance("confirm", Adw.ResponseAppearance.SUGGESTED);
         dialog.set_response_enabled("confirm", false);
         
@@ -188,7 +189,7 @@ export const RTPSettings = GObject.registerClass({
 });
 
 const RtpGroup = GObject.registerClass({
-        GTypeName: 'RtpGroup',
+        GTypeName: "RtpGroup",
         InternalChildren: [],
     }, class RtpGroup extends Adw.PreferencesGroup {
         constructor({name, devices, onAddDevice, onEditGroup, onEditDevice, onGroupDeleted, onDeviceDeleted}) {
@@ -259,7 +260,7 @@ const RtpGroup = GObject.registerClass({
 
 
 const RtpDevice = GObject.registerClass({
-        GTypeName: 'RtpDevice',
+        GTypeName: "RtpDevice",
         InternalChildren: [],
     }, class RtpDevice extends Adw.ActionRow {
         constructor({name, address, onEdit, onDelete}) {

@@ -1,31 +1,34 @@
-import Adw from 'gi://Adw';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import Gio from 'gi://Gio';
+import Adw from "gi://Adw";
+import GLib from "gi://GLib";
+import GObject from "gi://GObject";
+import Gio from "gi://Gio";
+import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+
 import {execute} from "../command.js";
 
+
 export const GeneralSettings = GObject.registerClass({
-    GTypeName: 'GeneralSettings',
-    Template: GLib.uri_resolve_relative(import.meta.url, '../../resources/ui/settings_general.ui', GLib.UriFlags.NONE),
+    GTypeName: "GeneralSettings",
+    Template: GLib.uri_resolve_relative(import.meta.url, "../../resources/ui/settings_general.ui", GLib.UriFlags.NONE),
     InternalChildren: [
-        'general_preferences',
-        'show_icon',
-        'enable_airplay',
-        'enable_rtp_sending',
-        'enable_rtp_receiving',
-        'installation_hint',
+        "general_preferences",
+        "show_icon",
+        "enable_airplay",
+        "enable_rtp_sending",
+        "enable_rtp_receiving",
+        "installation_hint",
     ],
 }, class GeneralSettings extends Adw.PreferencesPage {
     constructor(settings, pactlInstalled) {
         super({});
 
         this.settings = settings;
-        this.settings.bind('show-icon', this._show_icon, 'active', Gio.SettingsBindFlags.DEFAULT);
-        this.settings.bind('enable-airplay', this._enable_airplay, 'active', Gio.SettingsBindFlags.DEFAULT);
-        this.settings.bind('enable-rtp-sending', this._enable_rtp_sending, 'active', Gio.SettingsBindFlags.DEFAULT);
-        this.settings.bind('enable-rtp-receiving', this._enable_rtp_receiving, 'active', Gio.SettingsBindFlags.DEFAULT);
+        this.settings.bind("show-icon", this._show_icon, "active", Gio.SettingsBindFlags.DEFAULT);
+        this.settings.bind("enable-airplay", this._enable_airplay, "active", Gio.SettingsBindFlags.DEFAULT);
+        this.settings.bind("enable-rtp-sending", this._enable_rtp_sending, "active", Gio.SettingsBindFlags.DEFAULT);
+        this.settings.bind("enable-rtp-receiving", this._enable_rtp_receiving, "active", Gio.SettingsBindFlags.DEFAULT);
 
-        this.settings.connect('changed::enable-rtp-receiving', () => {
+        this.settings.connect("changed::enable-rtp-receiving", () => {
             this.showIpAddressIfEnabled();
         });
 

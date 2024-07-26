@@ -31,7 +31,7 @@ const WirelessAudioQuickToggle = GObject.registerClass(
 class WirelessAudioQuickToggle extends QuickToggle {
     constructor(icon) {
         super({
-            title: _('Wireless Audio'),
+            title: _("Wireless Audio"),
             toggleMode: true
         });
         
@@ -42,7 +42,7 @@ class WirelessAudioQuickToggle extends QuickToggle {
 
 const WirelessAudioIndicator = GObject.registerClass(
 class WirelessAudioIndicator extends SystemIndicator {
-    constructor(icon) {
+    constructor(showIconInTopbar, icon) {
         super();
 
         this._indicator = this._addIndicator();
@@ -50,7 +50,7 @@ class WirelessAudioIndicator extends SystemIndicator {
         
         this.toggle = new WirelessAudioQuickToggle(icon);
 
-        this.visible = this.settings.get_boolean('show-icon') && this.toggle.checked;
+        this.visible = showIconInTopbar && this.toggle.checked;
         this.quickSettingsItems.push(this.toggle);
     }
 });
@@ -63,6 +63,7 @@ export default class QuickSettingsAirPlayExtension extends Extension {
         this._enable_airplay_signal = null;
         this._enable_rtp_sending_signal = null;
         this._enable_rtp_receiving_signal = null;
+        this._rtp_devices_changed_signal = null;
         this.checkDefaultSinkInterval = null;
 
         this._appIcon = Gio.icon_new_for_string(`${this.path}/resources/icons/hicolor/scalable/actions/speaker-wireless-symbolic.svg`);
@@ -73,7 +74,7 @@ export default class QuickSettingsAirPlayExtension extends Extension {
         this.rtpSend = new RtpSendController(this._settings);
         this.rtpReceive = new RtpReceiveController();
 
-        this._indicator = new WirelessAudioIndicator(this._appIcon);
+        this._indicator = new WirelessAudioIndicator(this._settings.get_boolean("show-icon"), this._appIcon);
         this.toggle = this._indicator.toggle;
 
         Main.panel.statusArea.quickSettings.addExternalIndicator(this._indicator);
@@ -81,39 +82,46 @@ export default class QuickSettingsAirPlayExtension extends Extension {
         if( this.pactl.isInstalled() ) {
 
             // observe the toggle state
-            this._toggle_checked_signal = this.toggle.connect('notify::checked', () => {
-                this.toggle.checked && this.settings.get_boolean('show-icon') ?
+            this._toggle_checked_signal = this.toggle.connect("notify::checked", () => {
+                this.toggle.checked && this._settings.get_boolean("show-icon") ?
                     this.showTopbarIcon() : this.hideTopbarIcon();
 
-                this.toggle.checked && this._settings.get_boolean('enable-airplay') ?
+                this.toggle.checked && this._settings.get_boolean("enable-airplay") ?
                     this.airplay.enable() : this.airplay.disable();
 
-                this.toggle.checked && this._settings.get_boolean('enable-rtp-sending') ?
+                this.toggle.checked && this._settings.get_boolean("enable-rtp-sending") ?
                     this.enableRtpSend() : this.disableRtpSend();
 
-                this.toggle.checked && this._settings.get_boolean('enable-rtp-receiving') ?
+                this.toggle.checked && this._settings.get_boolean("enable-rtp-receiving") ?
                     this.enableRtpReceive() : this.disableRtpReceive();
             });
 
             // observe the states of the settings
-            this._show_icon_signal = this.settings.connect('changed::show-icon', () => {
-                this.settings.get_boolean('show-icon') && this.toggle.checked ?
+            this._show_icon_signal = this._settings.connect("changed::show-icon", () => {
+                this._settings.get_boolean("show-icon") && this.toggle.checked ?
                     this.showTopbarIcon() : this.hideTopbarIcon();
             });
 
-            this._enable_airplay_signal = this._settings.connect('changed::enable-airplay', () => {
-                this._settings.get_boolean('enable-airplay') && this.toggle.checked ?
+            this._enable_airplay_signal = this._settings.connect("changed::enable-airplay", () => {
+                this._settings.get_boolean("enable-airplay") && this.toggle.checked ?
                     this.airplay.enable() : this.airplay.disable();
             });
 
-            this._enable_rtp_sending_signal = this._settings.connect('changed::enable-rtp-sending', () => {
-                this._settings.get_boolean('enable-rtp-sending') && this.toggle.checked ?
+            this._enable_rtp_sending_signal = this._settings.connect("changed::enable-rtp-sending", () => {
+                this._settings.get_boolean("enable-rtp-sending") && this.toggle.checked ?
                     this.enableRtpSend() : this.disableRtpSend();
             });
 
-            this._enable_rtp_receiving_signal = this._settings.connect('changed::enable-rtp-receiving', () => {
-                this._settings.get_boolean('enable-rtp-receiving') && this.toggle.checked ?
+            this._enable_rtp_receiving_signal = this._settings.connect("changed::enable-rtp-receiving", () => {
+                this._settings.get_boolean("enable-rtp-receiving") && this.toggle.checked ?
                     this.enableRtpReceive() : this.disableRtpReceive();
+            });
+
+            this._rtp_devices_changed_signal = this._settings.connect("changed::rtp-devices", () => {
+                if(this.toggle.checked) {
+                    this.rtpSend.disable();
+                    this.rtpSend.enable();
+                }
             });
         }
     }
@@ -128,14 +136,16 @@ export default class QuickSettingsAirPlayExtension extends Extension {
     }
 
     disableRtpSend() {
-        this.rtpSend.disable();
-        clearInterval(this.checkDefaultSinkInterval);
+        if(this.checkDefaultSinkInterval) {
+            clearInterval(this.checkDefaultSinkInterval);
+        }
         this.checkDefaultSinkInterval = null;
+        this.rtpSend.disable();
     }
 
     enableRtpReceive() {
         this.rtpReceive.enable();
-        Main.osdWindowManager.show(-1, this._appIcon, "Your Device is now available as audio receiver", null, null);
+        Main.osdWindowManager.show(-1, this._appIcon, _("Your Device is now available as audio receiver"), null, null);
     }
 
     disableRtpReceive() {
@@ -143,11 +153,11 @@ export default class QuickSettingsAirPlayExtension extends Extension {
     }
 
     showTopbarIcon() {
-        this.toggle.visible = true;
+        this._indicator.visible = true;
     }
 
     hideTopbarIcon() {
-        this.toggle.visible = false;
+        this._indicator.visible = false;
     }
 
     disable() {
@@ -177,6 +187,10 @@ export default class QuickSettingsAirPlayExtension extends Extension {
         if (this._enable_rtp_receiving_signal) {
             this._settings.disconnect(this._enable_rtp_receiving_signal);
             this._enable_rtp_receiving_signal = null;
+        }
+        if (this._rtp_devices_changed_signal) {
+            this._settings.disconnect(this._rtp_devices_changed_signal);
+            this._rtp_devices_changed_signal = null;
         }
 
         // disable all controllers

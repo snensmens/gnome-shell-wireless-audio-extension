@@ -6,7 +6,7 @@ import {execute} from './command.js';
 export class RtpReceiveController {
     constructor() {
         this.moduleId = null;
-        this.isEnabled = () => this.moduleID != null;
+        this.isEnabled = () => this.moduleId != null;
     }
     
     enable() {
@@ -36,13 +36,15 @@ export class RtpSendController {
         this.groups = [];
         
         const rtpSettings = JSON.parse(Json.to_string(Json.gvariant_serialize(this.settings.get_value("rtp-devices")), false));
-        
-        rtpSettings.groups.forEach((group) => {
-            this.groups.push(new RtpGroup({
-                name: group.name,
-                devices: group.devices
-            }));
-        });
+
+        if(rtpSettings.groups) {
+            rtpSettings.groups.forEach((group) => {
+                this.groups.push(new RtpGroup({
+                    name: group.name,
+                    devices: group.devices
+                }));
+            });
+        }
         
         this.groups.forEach((group) => {
             group.load();
@@ -52,7 +54,9 @@ export class RtpSendController {
     disable() {
         this.groups.forEach((group) => {
             group.unload();
+            group = null;
         });
+        this.groups = [];
     }
 
     enableGroupIfActive(defaultSink) {
@@ -67,7 +71,7 @@ class RtpGroup {
         this.name = name;
         this.moduleName = name.replace(/\s+/g, '');
         this.moduleId = null;
-        this.isEnabled = () => this.moduleID != null;
+        this.isEnabled = () => this.moduleId != null;
         
         this.devices = devices.map((device) => new RtpDevice({
             monitor: this.moduleName,
@@ -85,7 +89,9 @@ class RtpGroup {
     }
 
     loadDevices() {
-        this.devices.forEach(device => device.load());
+        if(this.isEnabled()) {
+            this.devices.forEach(device => device.load());
+        }
     }
 
     unload() {
@@ -108,12 +114,11 @@ class RtpDevice {
         this.monitor = monitor;
         this.address = address;
         this.moduleId = null;
-        this.isEnabled = () => this.moduleID != null;
+        this.isEnabled = () => this.moduleId != null;
     }
 
     load() {
         if(!this.isEnabled()) {
-            console.log("loading device", this.address);
             const loadRtpSendModuleAttempt = execute(`pactl load-module module-rtp-send source="${this.monitor}".monitor destination_ip=${this.address}`);
             if(loadRtpSendModuleAttempt.wasSuccessful) {
                 this.moduleId = loadRtpSendModuleAttempt.result;
@@ -123,7 +128,6 @@ class RtpDevice {
     
     unload() {
         if(this.isEnabled()) {
-            console.log("unloading device", this.address);
             const unloadModuleAttempt = execute(`pactl unload-module ${this.moduleId}`);
             if(unloadModuleAttempt.wasSuccessful) {
                 this.moduleId = null;

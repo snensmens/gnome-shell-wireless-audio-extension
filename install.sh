@@ -1,11 +1,6 @@
 #! /bin/bash
 
-blueprint-compiler compile ./resources/blueprints/settings_general.blp --output ./wireless-audio@github.snensmens.com/resources/ui/settings_general.ui
-blueprint-compiler compile ./resources/blueprints/settings_rtp.blp --output ./wireless-audio@github.snensmens.com/resources/ui/settings_rtp.ui
+sh pack.sh
 
-
-zip -r -q wireless-audio@github.snensmens.com.zip wireless-audio@github.snensmens.com
-gnome-extensions install wireless-audio@github.snensmens.com.zip --force
-rm wireless-audio@github.snensmens.com.zip
-
-echo "installation done"
+gnome-extensions install wireless-audio@github.snensmens.com.shell-extension.zip --force
+rm wireless-audio@github.snensmens.com.shell-extension.zip

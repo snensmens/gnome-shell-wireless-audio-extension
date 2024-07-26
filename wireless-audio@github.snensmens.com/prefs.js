@@ -1,7 +1,4 @@
-import Gio from 'gi://Gio';
-import Adw from 'gi://Adw';
-
-import { ExtensionPreferences, gettext as _ } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+import { ExtensionPreferences } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import { GeneralSettings } from './src/preferences/general.js';
 import { PactlController } from "./src/pactl.js";

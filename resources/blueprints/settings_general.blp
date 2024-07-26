@@ -9,27 +9,27 @@ template $GeneralSettings : Adw.PreferencesPage {
     title: _("General Settings");
 
     Adw.SwitchRow show_icon {
-      title: _("Show Icon in Topbar");
+      title: _("Show indicator in the top bar when the extension is active");
     }
   }
 
   Adw.PreferencesGroup airplay_preferences {
-    title: _("AirPlay Settings");
+    title: _("AirPlay");
 
     Adw.SwitchRow enable_airplay {
-      title: _("Discover AirPlay Devices");
+      title: _("Discover AirPlay-capable devices");
     }
   }
 
   Adw.PreferencesGroup rtp_preferences {
-    title: _("RTP Settings");
+    title: _("RTP");
 
     Adw.SwitchRow enable_rtp_sending {
       title: _("Stream audio to other devices");
     }
 
     Adw.SwitchRow enable_rtp_receiving {
-      title: _("Receive audiostreams on this device");
+      title: _("Receive audio on this device");
     }
   }
 
@@ -40,10 +40,6 @@ template $GeneralSettings : Adw.PreferencesPage {
 
       Label {
         label: _("This Extension requires pactl to be installed");
-      }
-      LinkButton {
-        label: _("Show setup instructions");
-        uri: "https://gjs.guide/guides/gio/actions-and-menus.html";
       }
     }
   }
